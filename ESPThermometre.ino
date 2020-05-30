@@ -40,11 +40,11 @@ void setup() {
   udp.begin(PORT);
 }
 
+float lastSendTemp;
+int lastSendSensor;
+unsigned long lastSendMillis;
+
 void loop() {
-  float lastSendTemp = 2000;
-  int lastSendSensor = 0;
-  unsigned long lastSendMillis;
-  
   ArduinoOTA.handle();  
   delay(dht.getMinimumSamplingPeriod());
   
@@ -60,6 +60,8 @@ void loop() {
 
     float tempAna = sensor*0.1-30.4;
 
+    Serial.printf("{\"mes1\":%3.1f,\"mes2\":%d,\"mes3\":%3.1f}", temp, sensor, tempAna);
+    Serial.println();
     udp.beginPacket(broadcastIP,PORT);
     udp.printf("{\"mes1\":%3.1f,\"mes2\":%d,\"mes3\":%3.1f}", temp, sensor, tempAna);
     udp.endPacket();
