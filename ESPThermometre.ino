@@ -40,6 +40,27 @@ void setup() {
   udp.begin(PORT);
 }
 
+int sensorFirst;
+int sensorCount;
+int sensorSum;
+
+void resetSensor(){
+  sensorFirst = analogRead(analogInPin);
+  Serial.print(sensorFirst);
+  Serial.print(" ");
+  sensorCount = 1;
+  sensorSum = 0;
+}
+
+int readSenor(){
+  int sensor = analogRead(analogInPin);
+  Serial.print(sensor);
+  Serial.print(" ");
+  sensorSum += (sensor - sensorFirst);
+  sensorCount++;
+  return sensorFirst + (sensorSum / sensorCount);
+}
+
 float lastSendTemp;
 int lastSendSensor;
 unsigned long lastSendMillis;
@@ -49,8 +70,8 @@ void loop() {
   delay(dht.getMinimumSamplingPeriod());
   
   float temp = dht.getTemperature();
-  int sensor = analogRead(analogInPin);
-
+  int sensor = readSenor();
+  
   if ((fabs(lastSendTemp - temp) > DELTATEMP) || 
       (abs(lastSendSensor - sensor) > DELTASENSOR) ||
       (millis() - lastSendMillis > RESENDMSEC)) {
@@ -65,5 +86,7 @@ void loop() {
     udp.beginPacket(broadcastIP,PORT);
     udp.printf("{\"mes1\":%3.1f,\"mes2\":%d,\"mes3\":%3.1f}", temp, sensor, tempAna);
     udp.endPacket();
+
+    resetSensor();
   }
 }
